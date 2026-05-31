@@ -1,5 +1,8 @@
 # AREC Green Bot
 
+[![CI](https://github.com/linyao0177/arec-green-bot/actions/workflows/ci.yml/badge.svg)](https://github.com/linyao0177/arec-green-bot/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+
 Automated client for the **Arkreen AREC** renewable-energy greening pipeline on
 Polygon. It turns real solar/wind miner output into greened Bitcoin blocks by
 running the full Arkreen flow end to end, unattended.
@@ -67,6 +70,19 @@ standalone integration documentation for anyone building on Arkreen AREC.
 | kWh token | `0x5740A27990d4AaA4FB83044a6C699D435B9BA6F1` |
 | AKRE token | `0xE9c21De62C5C5d0cEAcCe2762bF655AfDcEB7ab3` |
 | GreenBTC2S | `0x3221F5818A5CF99e09f5BE0E905d8F145935e3E0` |
+
+## Development
+
+```bash
+pip install -r requirements-dev.txt
+ruff check .     # lint
+pytest           # offline unit tests (no RPC / chain / API needed)
+```
+
+Tests cover the pure logic and every network-facing path via mocks: unit
+conversions, `yyyyMMdd`→unix, ERC721 `tokenId` extraction, JSON-RPC param
+encoding, GreenBTC domain selection, the Certified-token scan, and a full
+EIP-2612 permit round-trip (sign → recover). CI runs them on Python 3.10–3.12.
 
 ## ⚠️ Disclaimer
 

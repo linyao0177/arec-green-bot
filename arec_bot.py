@@ -297,17 +297,28 @@ def sign_permit_akre(w3: Web3, private_key: str, spender: str,
 # Step 1: mint AREC NFT
 # ════════════════════════════════════════════════════════════════════
 
+def _topic_hex(topic) -> str:
+    """Normalize a log topic (HexBytes / bytes / str) to lowercase '0x…' hex.
+
+    HexBytes.hex() has returned values with and without the '0x' prefix across
+    versions, so force plain bytes hex and re-prefix for a stable comparison.
+    """
+    if isinstance(topic, str):
+        return "0x" + topic.lower().removeprefix("0x")
+    return "0x" + bytes(topic).hex()
+
+
 def extract_token_id(receipt) -> int | None:
     """Pull the minted tokenId from an ERC721 Transfer event. See SKILL.md §6."""
     for entry in receipt.logs:
         t = entry.topics
-        if (len(t) >= 4 and t[0].hex().lower().lstrip("0x") == TRANSFER_SIG.lstrip("0x")
-                and t[1].hex().lower().endswith("0" * 40)):
-            return int(t[3].hex(), 16)  # tokenId is topics[3], NOT topics[2]
+        if (len(t) >= 4 and _topic_hex(t[0]) == TRANSFER_SIG
+                and int(_topic_hex(t[1]), 16) == 0):       # from == 0x0 (mint)
+            return int(_topic_hex(t[3]), 16)               # tokenId is topics[3]
     # Fallback: first small integer found in any indexed topic
     for entry in receipt.logs:
         for t in entry.topics[1:]:
-            v = int(t.hex(), 16)
+            v = int(_topic_hex(t), 16)
             if 0 < v < 10_000_000:
                 return v
     return None
